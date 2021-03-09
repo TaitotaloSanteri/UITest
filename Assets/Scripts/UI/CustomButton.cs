@@ -11,20 +11,25 @@ public class CustomButton : MonoBehaviour,
                             IPointerExitHandler, 
                             IPointerUpHandler
 {
-    [SerializeField] private Image backgroundImage;
-    [SerializeField] private TextMeshProUGUI text;
+    [SerializeField] protected Image backgroundImage;
+    [SerializeField] protected TextMeshProUGUI text;
     [Space]
     [SerializeField] private Color normalColor;
     [SerializeField] private Color onEnterColor;
     [SerializeField] private Color onDownColor;
     [SerializeField] private IButtonPressedHandler handler;
 
-    private void OnValidate()
+    private void Start()
     {
-        if (name == "ButtonPrefab") return;
         handler = GetComponentInParent<IButtonPressedHandler>();
+        if (name == "ButtonPrefab") return;
+     
         if (handler == null) 
             Debug.Log("No handler for " + name);
+    }
+
+    private void OnValidate()
+    {
         backgroundImage.color = normalColor;
     }
 
@@ -33,22 +38,22 @@ public class CustomButton : MonoBehaviour,
         backgroundImage.color = normalColor;
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    public virtual void OnPointerDown(PointerEventData eventData)
     {
         backgroundImage.color = onDownColor;
     }
 
-    public void OnPointerEnter(PointerEventData eventData)
+    public virtual void OnPointerEnter(PointerEventData eventData)
     {
         backgroundImage.color = onEnterColor;
     }
 
-    public void OnPointerExit(PointerEventData eventData)
+    public virtual void OnPointerExit(PointerEventData eventData)
     {
         backgroundImage.color = normalColor;
     }
 
-    public void OnPointerUp(PointerEventData eventData)
+    public virtual void OnPointerUp(PointerEventData eventData)
     {
         backgroundImage.color = onEnterColor;
         handler.OnButtonPressed(transform);
