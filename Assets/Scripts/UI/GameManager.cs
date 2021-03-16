@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour, IDraggableButtonHandler, IButtonPresse
     private LetterSlot[] allLetterSlots;
     private string currentWord;
     private string activeWord;
+    private bool isNear;
 
     private void Awake()
     {
@@ -37,7 +38,7 @@ public class GameManager : MonoBehaviour, IDraggableButtonHandler, IButtonPresse
             
             float x = Random.Range(letterArea.rect.xMin, letterArea.rect.xMax) + letterArea.anchoredPosition.x;
             float y = Random.Range(letterArea.rect.yMin, letterArea.rect.yMax) + letterArea.anchoredPosition.y;
-            newButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(x, y);
+            newButton.GetComponent<RectTransform>().anchoredPosition = newButton.startPosition = new Vector2(x, y);
 
             LetterSlot empty = Instantiate(letterSlotPrefab, transform);
             allLetterSlots[i] = empty;
@@ -77,19 +78,22 @@ public class GameManager : MonoBehaviour, IDraggableButtonHandler, IButtonPresse
         for (int i = 0; i < allLetterSlots.Length; i++)
         {
             float dist = Vector2.Distance(t.anchoredPosition, allLetterSlots[i].rectTransform.anchoredPosition);
-            if (allLetterSlots[i].letterSlotState == LetterSlotState.EMPTY && dist < range)
+            if (!isNear && allLetterSlots[i].letterSlotState == LetterSlotState.EMPTY && dist < range)
             {
                 allLetterSlots[i].ChangeState(LetterSlotState.NEAR);
+                isNear = true;
             }
             else if (allLetterSlots[i].letterSlotState == LetterSlotState.NEAR && dist >= range)
             {
                 allLetterSlots[i].ChangeState(LetterSlotState.EMPTY);
+                isNear = false;
             }
         }
     }
 
     public void OnEndDrag(RectTransform t)
     {
+        isNear = false;
         for (int i = 0; i < allLetterSlots.Length; i++)
         {
             if (allLetterSlots[i].letterSlotState == LetterSlotState.NEAR)
@@ -97,9 +101,12 @@ public class GameManager : MonoBehaviour, IDraggableButtonHandler, IButtonPresse
                 DraggableButton button = t.GetComponent<DraggableButton>();
                 allLetterSlots[i].ChangeState(LetterSlotState.HASLETTER, button.GetText(), button);
                 t.anchoredPosition = allLetterSlots[i].rectTransform.anchoredPosition;
-                ChangeCharacterInActiveWord(button.GetText().ToCharArray()[0], i);               
+                ChangeCharacterInActiveWord(button.GetText().ToCharArray()[0], i);
+                return;
             }
         }
+        DraggableButton btn = t.GetComponent<DraggableButton>();
+        t.anchoredPosition = btn.startPosition;
     }
 
     // Funktio, jolla vaihdetaan kirjain kerralla arvattavasta sanasta.

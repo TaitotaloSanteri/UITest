@@ -7,6 +7,7 @@ public class DraggableButton : CustomButton, IDragHandler, IEndDragHandler, IBeg
 {
     private IDraggableButtonHandler draggableButtonHandler;
     [SerializeField] private RectTransform rectTransform;
+    public Vector2 startPosition;
 
     private void OnValidate()
     {
