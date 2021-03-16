@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour, IDraggableButtonHandler, IButtonPressedHandler
 {
@@ -11,13 +14,20 @@ public class GameManager : MonoBehaviour, IDraggableButtonHandler, IButtonPresse
     [SerializeField] private float spacing = 75f, range = 75f;
     private LetterSlot[] allLetterSlots;
     private string currentWord;
+    private string activeWord;
 
     private void Awake()
     {
         int index = Random.Range(0, words.Length);
         currentWord = words[index];
+        for (int i = 0; i < currentWord.Length; i++)
+        {
+            activeWord += "*";
+        }
+
         allLetterSlots = new LetterSlot[currentWord.Length];
 
+        float size = (float)currentWord.Length * 0.5f;
         for (int i = 0; i < currentWord.Length; i++)
         {
             DraggableButton newButton = Instantiate(draggableButtonPrefab, transform);
@@ -31,30 +41,74 @@ public class GameManager : MonoBehaviour, IDraggableButtonHandler, IButtonPresse
 
             LetterSlot empty = Instantiate(letterSlotPrefab, transform);
             allLetterSlots[i] = empty;
-            empty.GetComponent<RectTransform>().anchoredPosition = new Vector2(-800f + (i * spacing), Screen.height * 0.4f);
+            float imageSize = empty.image.rectTransform.sizeDelta.x;
+            Debug.Log(imageSize);
+            empty.GetComponent<RectTransform>().anchoredPosition = new Vector2(-size * (imageSize + spacing) + (i * (imageSize + spacing)), Screen.height * 0.4f);
             empty.transform.SetAsFirstSibling();
         }
     }
 
-
-    public void OnBeginDrag(Transform t)
+    private void Update()
     {
+        if (activeWord == currentWord)
+        {
+            Debug.Log("JEE TIESIT SANAN OIKEIN!");
+        }
     }
 
-    public void OnDrag(Transform t)
+    public void OnBeginDrag(RectTransform t)
     {
+        // Tarkistetaan kaikista letter sloteista, että onko niissä kirjaimia ja onko kyseinen 
+        // kirjain sama nappula, kuin mitä aloitetaan raahaamaan.
         for (int i = 0; i < allLetterSlots.Length; i++)
         {
-            float dist = Vector2.Distance(t.position, allLetterSlots[i].transform.position);
-            if (allLetterSlots[i].letterSlotState == LetterSlotState.EMPTY && dist < range)
+            if (allLetterSlots[i].letterSlotState == LetterSlotState.HASLETTER &&
+                allLetterSlots[i].activeDraggableButton == t.GetComponent<DraggableButton>())
             {
-                allLetterSlots[i].ChangeState(LetterSlotState.NEAR);
+                // Jos on, niin asetetaan letter slotin state emptyksi.
+                allLetterSlots[i].ChangeState(LetterSlotState.EMPTY);
+                ChangeCharacterInActiveWord('*', i);
             }
         }
     }
 
-    public void OnEndDrag(Transform t)
+    public void OnDrag(RectTransform t)
     {
+        for (int i = 0; i < allLetterSlots.Length; i++)
+        {
+            float dist = Vector2.Distance(t.anchoredPosition, allLetterSlots[i].rectTransform.anchoredPosition);
+            if (allLetterSlots[i].letterSlotState == LetterSlotState.EMPTY && dist < range)
+            {
+                allLetterSlots[i].ChangeState(LetterSlotState.NEAR);
+            }
+            else if (allLetterSlots[i].letterSlotState == LetterSlotState.NEAR && dist >= range)
+            {
+                allLetterSlots[i].ChangeState(LetterSlotState.EMPTY);
+            }
+        }
+    }
+
+    public void OnEndDrag(RectTransform t)
+    {
+        for (int i = 0; i < allLetterSlots.Length; i++)
+        {
+            if (allLetterSlots[i].letterSlotState == LetterSlotState.NEAR)
+            {
+                DraggableButton button = t.GetComponent<DraggableButton>();
+                allLetterSlots[i].ChangeState(LetterSlotState.HASLETTER, button.GetText(), button);
+                t.anchoredPosition = allLetterSlots[i].rectTransform.anchoredPosition;
+                ChangeCharacterInActiveWord(button.GetText().ToCharArray()[0], i);               
+            }
+        }
+    }
+
+    // Funktio, jolla vaihdetaan kirjain kerralla arvattavasta sanasta.
+    private void ChangeCharacterInActiveWord(char letter, int index)
+    {
+        StringBuilder stringBuilder = new StringBuilder(activeWord);
+        stringBuilder[index] = letter;
+        activeWord = stringBuilder.ToString();
+        Debug.Log(activeWord);
     }
 
     public void OnButtonPressed(Transform t)

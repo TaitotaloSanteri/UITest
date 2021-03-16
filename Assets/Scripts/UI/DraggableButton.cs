@@ -3,9 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class DraggableButton : CustomButton, IDragHandler
+public class DraggableButton : CustomButton, IDragHandler, IEndDragHandler, IBeginDragHandler
 {
     private IDraggableButtonHandler draggableButtonHandler;
+    [SerializeField] private RectTransform rectTransform;
+
+    private void OnValidate()
+    {
+        rectTransform = GetComponent<RectTransform>();
+    }
 
     private void Awake()
     {
@@ -15,10 +21,25 @@ public class DraggableButton : CustomButton, IDragHandler
     {
         text.text = _text;
     }
+    public string GetText()
+    {
+        return text.text;
+    }
+
 
     public void OnDrag(PointerEventData eventData)
     {
         transform.position = Input.mousePosition;
-        draggableButtonHandler.OnDrag(transform);
+        draggableButtonHandler.OnDrag(rectTransform);
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        draggableButtonHandler.OnEndDrag(rectTransform);
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        draggableButtonHandler.OnBeginDrag(rectTransform);
     }
 }

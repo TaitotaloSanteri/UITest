@@ -306,14 +306,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   draggableButtonPrefab: {fileID: 9022201841097034063, guid: 8b21438394a950045a738d125802f3d3,
     type: 3}
-  emptyPrefab: {fileID: 8421814407859218416, guid: c634cdbffe2f5484e8377d81d37f73a2,
+  letterSlotPrefab: {fileID: 8604928868785965051, guid: c634cdbffe2f5484e8377d81d37f73a2,
     type: 3}
   words:
-  - Tietokone
-  - Tiikeri
-  - Lompakko
+  - tietokone
+  - tiikeri
+  - lompakko
+  - mikrofoni
+  - tuuletin
+  - roskakori
+  - kahvikuppi
+  - pahvilaatikko
+  - nurmikko
   letterArea: {fileID: 1819771764}
-  spacing: 150
+  spacing: 50
+  range: 90
 --- !u!114 &1489556950
 MonoBehaviour:
   m_ObjectHideFlags: 0

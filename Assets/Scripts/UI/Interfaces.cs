@@ -6,7 +6,7 @@ public interface IButtonPressedHandler
 }
 public interface IDraggableButtonHandler
 {
-    void OnBeginDrag(Transform t);
-    void OnDrag(Transform t);
-    void OnEndDrag(Transform t);
+    void OnBeginDrag(RectTransform t);
+    void OnDrag(RectTransform t);
+    void OnEndDrag(RectTransform t);
 }
